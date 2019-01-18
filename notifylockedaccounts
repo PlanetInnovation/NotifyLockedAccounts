@@ -1,0 +1,19 @@
+#!/bin/bash
+# Simple script to email list of locked user accounts
+
+# to make stateful create a /tmp/lockedcheck.txt and add/remove users if lockout detected
+
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+lockedaccounts=$(pdbedit -L -v | grep "Unix username:" -A2 | tr -d '\n' | sed 's/--/\n/g' | egrep '\[UL' | sed 's/NT\ username\://g' | awk '{ print $3 }')
+
+if [ "$lockedaccounts" = "" ]
+  then
+    # do nothing since there are no locked accounts
+    :
+  else
+    echo "The following accounts are locked out: $lockedaccounts" | /usr/bin/mail -s "User account is locked" -a "From: it-support@YourCompanyName.com" it-support@YourCompanyName.com
+fi
+
